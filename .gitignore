@@ -1,0 +1,18 @@
+# Archivos y carpetas generadas por Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Archivos y carpetas específicas de tu editor de código (opcional)
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Archivos de configuración locales (por ejemplo, .env) que contienen secretos
+.env
+
+# Dependiendo de tu caso, también podrías querer ignorar ciertos archivos o directorios específicos creados en tu proyecto.
+
+# Ignorar todos los archivos y carpetas dentro de la carpeta "log"
+log/*
