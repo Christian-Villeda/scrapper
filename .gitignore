@@ -15,4 +15,4 @@ yarn-error.log
 # Dependiendo de tu caso, también podrías querer ignorar ciertos archivos o directorios específicos creados en tu proyecto.
 
 # Ignorar todos los archivos y carpetas dentro de la carpeta "log"
-log/*
+logs/*

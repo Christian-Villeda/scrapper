@@ -12,6 +12,7 @@
     "axios": "^1.4.0",
     "axios-cookiejar-support": "^4.0.6",
     "cheerio": "^1.0.0-rc.12",
+    "cors": "^2.8.5",
     "express": "^4.18.2",
     "fetch-cookie": "^2.1.0",
     "fs": "^0.0.1-security",
