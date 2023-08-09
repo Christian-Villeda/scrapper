@@ -85,21 +85,35 @@ async function scrapeProductData(url) {
   let browser;
 
   try {
-    // Iniciar el navegador Chromium
        // Iniciar el navegador Chromium
        browser = await chromium.launchPersistentContext('./prueba', {
-        headless: true,
+        headless: true, // Ejecutar en modo "headless" (sin interfaz gráfica)
         args: ['--blink-settings=imagesEnabled=false'] //bloqueo de carga de imagenes
-      });
-    
-    const page = await browser.newPage();
+        });
 
+    const page = await browser.newPage();
     // Navegar a una URL
     await page.goto(urlMin);
-
-    const deliverToActual = await page.$eval('#glow-ingress-line2', el => el.textContent.trim());
+    let deliverToActual = '';
+    //validar si amazon carga la pagina normal o el captcha 
+    try {
+    deliverToActual = await page.$eval('#glow-ingress-line2', el => el.textContent.trim());
     console.log('Enviar Actual:', deliverToActual);
 
+    } catch (error) {
+  // Borrar las cookies de todas las páginas dentro del contexto
+  const pages = await browser.pages();
+  for (const page of pages) {
+    await page.context().clearCookies();
+  }
+    // Refrescar la página
+    await page.reload();
+    console.log('Se recargo la pagina');
+
+    deliverToActual = await page.$eval('#glow-ingress-line2', el => el.textContent.trim());
+    console.log('Enviar Actual:', deliverToActual);
+    } 
+    // sigue el flujo normal 
     if (!deliverToActual.includes('Miami')) {
       // Esperar a que aparezca el selector de dirección y hacer clic en él
       await page.waitForSelector('#glow-ingress-line2');
@@ -122,6 +136,10 @@ async function scrapeProductData(url) {
 
       // Esperar a que aparezca el selector #GLUXHiddenSuccessSelectedAddressPlaceholder 
       await page.waitForSelector('#GLUXHiddenSuccessSelectedAddressPlaceholder');
+      
+      // Simular la pulsación de la tecla "Enter" en la página
+      await page.keyboard.press('Enter');
+      console.log('Se presiono enter');      
       
       // Esperar a que se actualice el DOM después de cambiar el código postal
       await page.waitForNavigation();
@@ -184,7 +202,7 @@ function ObtenerDatos(html) {
       result.url = `https://www.amazon.com/dp/${ASIN}?th=1&psc=1`;
       result.titulo = title || "sin datos";
       result.descripcion = description || "sin datos";
-      result.precioAmazon = priceFirst || "sin datos";
+      result.precioAmazon = priceFirst || 0;
       result.hora = currentTime;
       result.fecha = currentDate;
       result.ASIN = ASIN;
@@ -233,7 +251,10 @@ function findPrice($) {
     '#corePriceDisplay_desktop_feature_div > div.a-section.a-spacing-none.aok-align-center > span.a-price.aok-align-center.reinventPricePriceToPayMargin.priceToPay > span.a-offscreen',
     '#corePrice_desktop > div > table > tbody > tr:nth-child(2) > td.a-span12 > span.a-price.a-text-price.a-size-medium.apexPriceToPay > span:nth-child(2)',
     '#corePrice_feature_div > span.a-price.a-text-price.header-price.a-size-base.a-text-normal > span:nth-child(2)',
-    '#corePrice_feature_div > div > div > span.a-price.a-text-normal.aok-align-center.reinventPriceAccordionT2 > span.a-offscreen'
+    '#corePrice_feature_div > div > div > span.a-price.a-text-normal.aok-align-center.reinventPriceAccordionT2 > span.a-offscreen',
+    '#declarative_0 > table > tbody > tr > td.a-text-right.dp-new-col > span > a > span',
+    '#corePrice_feature_div > div > span.a-price.a-text-price.header-price.a-size-base.a-text-normal > span:nth-child(2)',
+    '#price',
   ];
 
   for (const selector of possiblePriceSelectors) {
